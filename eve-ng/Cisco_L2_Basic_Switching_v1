@@ -1,0 +1,86 @@
+Task: SW1
+
+VLAN 10, 20, 99
+10 = SALES
+20 = IT
+99 = NATIVE
+Untagged VLAN 99
+Etherchannel LACP, Active
+e0/0 + e0/1 = p1
+Port-Channel must be Trunking
+VLAN 10 = e0/2
+VLAN 20 = e0/3
+int e0/2 and e0/3 should be access ports
+
+Configuration: SW1
+
+en
+conf t
+hostname SW1
+vlan 10
+name SALES
+vlan 20
+name IT
+vlan 99
+name NATIVE
+int range e0/0-1
+channel-protocol lacp
+channel-group 1 mode active
+int p1
+switchport trunk encapsulation dot1q
+switchport mode trunk
+switchport trunk native vlan 99
+switchport trunk allowed vlan 10,20,99
+int e0/2
+switchport mode access
+switchport access vlan 10
+int e0/3
+switchport mode access
+switchport access vlan 20
+exit
+do wr
+=============================================================
+Task: SW2
+
+VLAN 10, 20, 99
+10 = SALES
+20 = IT
+99 = NATIVE
+Untagged VLAN 99
+Etherchannel LACP, Passive
+e0/0 + e0/1 = p1
+Port-Channel must be Trunking
+VLAN 10 = e0/2
+VLAN 20 = e0/3
+int e0/2 and e0/3 should be access ports
+
+Configuration: SW2
+
+en
+conf t
+hostname SW2
+vlan 10
+name SALES
+vlan 20
+name IT
+vlan 99
+name NATIVE
+int range e0/0-1
+channel-protocol lacp
+channel-group 1 mode passive
+int p1
+switchport trunk encapsulation dot1q
+switchport mode trunk
+switchport trunk native vlan 99
+switchport trunk allowed vlan 10,20,99
+int e0/2
+switchport mode access
+switchport access vlan 10
+int e0/3
+switchport mode access
+switchport access vlan 20
+exit
+do wr
+
+
+#Etherchannel LACP works without the trunk configuration, but when p1 is configured to trunk, etherchannel fails to bundle
