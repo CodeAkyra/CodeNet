@@ -12,34 +12,36 @@ VLAN 10 = e0/2
 VLAN 20 = e0/3
 int e0/2 and e0/3 should be access ports
 
+Template: Cisco IOL
+Image: L2-ADVENTERPRISE-M-15.1-20140814.bin
 Configuration: SW1
 
 en
-conf t
-hostname SW1
-vlan 10
-name SALES
-vlan 20
-name IT
-vlan 99
-name NATIVE
-int range e0/0-1
-channel-protocol lacp
-channel-group 1 mode active
-int p1
-switchport trunk encapsulation dot1q
-switchport mode trunk
-switchport trunk native vlan 99
-switchport trunk allowed vlan 10,20,99
-int e0/2
-switchport mode access
-switchport access vlan 10
-int e0/3
-switchport mode access
-switchport access vlan 20
-exit
-do wr
-=============================================================
+  conf t
+    hostname SW1
+    vlan 10
+      name SALES
+    vlan 20
+      name IT
+    vlan 99
+      name NATIVE
+    int range e0/0-1
+      channel-protocol lacp
+      channel-group 1 mode active
+    int p1
+      switchport trunk encapsulation dot1q
+      switchport mode trunk
+      switchport trunk native vlan 99
+      switchport trunk allowed vlan 10,20,99
+    int e0/2
+      switchport mode access
+      switchport access vlan 10
+    int e0/3
+      switchport mode access
+      switchport access vlan 20
+    exit
+  do wr
+==========================================================================================================================
 Task: SW2
 
 VLAN 10, 20, 99
@@ -54,33 +56,126 @@ VLAN 10 = e0/2
 VLAN 20 = e0/3
 int e0/2 and e0/3 should be access ports
 
+Template: Cisco IOL
+Image: L2-ADVENTERPRISE-M-15.1-20140814.bin
 Configuration: SW2
 
 en
-conf t
-hostname SW2
-vlan 10
-name SALES
-vlan 20
-name IT
-vlan 99
-name NATIVE
-int range e0/0-1
-channel-protocol lacp
-channel-group 1 mode passive
-int p1
-switchport trunk encapsulation dot1q
-switchport mode trunk
-switchport trunk native vlan 99
-switchport trunk allowed vlan 10,20,99
-int e0/2
-switchport mode access
-switchport access vlan 10
-int e0/3
-switchport mode access
-switchport access vlan 20
-exit
-do wr
+  conf t
+    hostname SW2
+    vlan 10
+      name SALES
+    vlan 20
+      name IT
+    vlan 99
+      name NATIVE
+    int range e0/0-1
+      channel-protocol lacp
+      channel-group 1 mode passive
+    int p1
+      switchport trunk encapsulation dot1q
+      switchport mode trunk
+      switchport trunk native vlan 99
+      switchport trunk allowed vlan 10,20,99
+    int e0/2
+      switchport mode access
+      switchport access vlan 10
+    int e0/3
+      switchport mode access
+      switchport access vlan 20
+    exit
+   do wr
 
 
-#Etherchannel LACP works without the trunk configuration, but when p1 is configured to trunk, etherchannel fails to bundle
+#Etherchannel LACP works without the trunk configuration, but when p1 is configured to trunk, etherchannel fails to bundle (FIXED)
+
+FIXED CONFIG
+==========================================================================================================================
+
+Template: Cisco IOL
+Image: L2-ADVENTERPRISE-M-15.1-20140814.bin
+Configuration: SW1
+
+en
+  conf t
+    hostname SW1
+    vlan 10
+      name SALES
+    vlan 20
+      name IT
+    vlan 99
+      name NATIVE
+    int p1
+      switchport
+      switchport trunk encapsulation dot1q
+      switchport mode trunk
+      switchport trunk native vlan 99
+      switchport trunk allowed vlan 10,20,99
+    ###before configuring e0/0-1, proceed to configuring SW2 int p1 first with trunk encapsulation 
+    int range e0/0-1
+      channel-protocol lacp
+      channel-group 1 mode active
+      switchport trunk encapsulation dot1q
+      switchport mode trunk
+      switchport trunk native vlan 99
+      switchport trunk allowed vlan 10,20,99
+    int e0/2
+      switchport mode access
+      switchport access vlan 10
+    int e0/3
+      switchport mode access
+      switchport access vlan 20
+      exit
+    do wr
+
+==========================================================================================================================
+
+Template: Cisco IOL
+Image: L2-ADVENTERPRISE-M-15.1-20140814.bin
+Configuration: SW2
+
+en
+  conf t
+    hostname SW2
+    vlan 10
+      name SALES
+    vlan 20
+      name IT
+    vlan 99
+      name NATIVE
+    int p1
+      switchport
+      switchport trunk encapsulation dot1q
+      switchport mode trunk
+      switchport trunk native vlan 99
+      switchport trunk allowed vlan 10,20,99
+    int range e0/0-1
+      channel-protocol lacp
+      channel-group 1 mode passive
+      switchport trunk encapsulation dot1q
+      switchport mode trunk
+      switchport trunk native vlan 99
+      switchport trunk allowed vlan 10,20,99
+    int e0/2
+      switchport mode access
+      switchport access vlan 10
+    int e0/3
+      switchport mode access
+      switchport access vlan 20
+      exit
+    do wr
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
