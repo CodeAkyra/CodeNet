@@ -53,6 +53,7 @@ SW3(config)#ip dhcp snooping verify mac-address
 ```
 To enhance Layer 2 security on SW3, I enabled DHCP Snooping for VLANs 102 and 202 and activated MAC address verification to ensure the source MAC address in DHCP requests matches the client's hardware address. This configuration builds a DHCP binding database that prevents DHCP spoofing attacks by ensuring users only receive IP addresses from legitimate sources while dropping packets from unauthorized or rogue DHCP servers.
 
+<!-- add images or gif nung traffic flow ng topology -->
 </details>
 
 ___
@@ -90,6 +91,75 @@ ___
 ___
 # VLAN LLDP Sim
 ![11](imgs/VLAN_LLDP_Sim.png)
+
+<details>
+<summary>Click to view configuration and explanation</summary>
+
+### 1. Configure SW-1 with VLAN 35 and label it exactly as SALES
+```
+SW1>en
+SW1#conf t
+SW1(config)#vlan 35
+SW1(config-vlan)#name SALES
+SW1(config-vlan)#exit
+```
+To create VLANs, enter the command `SW1(config)#vlan [vlan-id]`. To name the vlan, enter `SW1(config-vlan)#name [NAME]` while in VLAN configuration mode
+
+### 2. Configure SW-2 with VLAN 39 and label it exactly as MARKETING
+```
+SW2>en
+SW2#conf t
+SW2(config)#vlan 39
+SW2(config-vlan)#name MARKETING
+SW2(config-vlan)#exit
+```
+To create VLANs, enter the command `SW2(config)#vlan [vlan-id]`. To name the vlan, enter `SW2(config-vlan)#name [NAME]` while in VLAN configuration mode
+
+### 3. Configure the switch port connecting to PC1
+```
+SW1>en
+SW1#conf t
+SW1(config)#int f0/2
+SW1(config-if)#switch mode access
+SW1(config-if)#switch access vlan 35
+SW1(config-if)#exit
+```
+We are configuring interface f0/2 (connected to PC1) as an access port and assigning it to VLAN 35. To do this, while in interface configuration mode, `SW1(config-if)#enter switchport mode access` to statically set the port to access mode. Then, use the command `SW1(config-if)#switchport access vlan [vlan-id]` to assign the specific VLAN to that port.
+
+### 4. Configure the switch port connecting to PC2
+```
+SW2>en
+SW2#conf t
+SW2(config)#int f0/2
+SW2(config-if)#switch mode access
+SW2(config-if)#switch access vlan 39
+SW2(config-if)#exit
+```
+We are configuring interface f0/2 (connected to PC2) as an access port and assigning it to VLAN 39. To do this, while in interface configuration mode, `SW2(config-if)#enter switchport mode access` to statically set the port to access mode. Then, use the command `SW2(config-if)#switchport access vlan [vlan-id]` to assign the specific VLAN to that port.
+
+### 5. Configure SW-1 and SW-2 for universal neighbor discovery using the industry standard protocol and disable it on the interface connecting to PC1
+### Switch 1
+```
+SW1>en
+SW1#conf t
+SW1(config)#lldp run
+SW1(config)#int f0/2
+SW1(config-if)#no lldp transmit
+SW1(config-if)#no lldp receive
+SW1(config-if)#exit
+```
+To enable universal neighbor discovery using the industry-standard protocol (LLDP), enter the command `SW1(config)#lldp run`. We are then tasked to disable discovery on the interface connecting to PC1. To do this, enter interface configuration mode with `SW1(config)#interface f0/2` and use the commands `SW1(config-if)#no lldp transmit` and `SW1(config-if)#no lldp receive` to stop the switch from sending or receiving discovery packets on that interface
+
+### Switch 2
+```
+SW2>en
+SW2#conf t
+SW2(config)#lldp run
+SW2(config)#int f0/2
+SW2(config-if)#exit
+```
+To enable universal neighbor discovery using the industry-standard protocol (LLDP), enter the command `SW2(config)#lldp run`.
+</details>
 
 ___
 # VLAN and Trunking Sim
