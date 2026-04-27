@@ -165,3 +165,111 @@ ___
 # VLAN and Trunking Sim
 ![12](imgs/VLAN_and_Trunking_Sim.png)
 
+<details>
+<summary>Click to view configuration and explanation</summary>
+
+### 1. Configure the VLANs on the designated switches and assign them as access ports to the interfaces connected to the PCs.
+
+### Switch 1
+```
+SW1>en
+SW1#conf t
+SW1(config)#vlan 210
+SW1(config-vlan)#name FINANCE
+SW1(config-vlan)#int f0/1
+SW1(config-if)#switchport mode access
+SW1(config-if)#switchport access vlan 210
+SW1(config-if)#exit
+```
+To create VLANs, enter the command `SW1(config)#vlan [vlan-id]`. To name the vlan, enter `SW1(config-vlan)#name [NAME]` while in VLAN configuration mode. After creating and labeling VLAN 210, assign it to the interface connected to the laptop by entering `SW1(config-if)#switchport mode access` and `SW1(config-if)#switchport access vlan 210`.
+
+### Switch 2
+```
+SW2>en
+SW2#conf t
+SW2(config)#vlan 110
+SW2(config-vlan)#name MARKETING
+SW2(config-vlan)#vlan 210
+SW2(config-vlan)#name FINANCE
+SW2(config-vlan)#int f0/1
+SW2(config-if)#switchport mode access
+SW2(config-if)#switchport access vlan 110
+SW2(config-if)#exit
+```
+To create VLANs, enter the command `SW2(config)#vlan [vlan-id]`. To name the VLAN, enter `SW2(config-vlan)#name [NAME]` while in VLAN configuration mode. For Switch 2, it is necessary to create VLAN 210 for trunking to function correctly. Even if the switch does not have end-user devices phsycally plugged into a specific VLAN, it cannot pass that traffic through its trunk ports if it doesn't know the VLANs exist. After configuring the VLANs, assign the appropriate VLAN to the interface connected to the laptop by entering `SW2(config-if)#switchport mode access` and `SW2(config-if)#switchport access vlan [vlan-id]`.
+
+### Switch 3
+```
+SW3>en
+SW3#conf t
+SW3(config)#vlan 110
+SW3(config-vlan)#name MARKETING
+SW3(config-vlan)#vlan 210
+SW3(config-vlan)#name FINANCE
+SW3(config-vlan)#int f0/1
+SW3(config-if)#switchport mode access
+SW3(config-if)#switchport access vlan 210
+SW3(config-if)#int f0/2
+SW3(config-if)#switchport mode access
+SW3(config-if)#switchport access vlan 110
+SW3(config-if)#exit
+```
+To create VLANs, enter the command `SW3(config)#vlan [vlan-id]`. To name the vlan, enter `SW3(config-vlan)#name [NAME]` while in VLAN configuration mode. After creating and labeling VLANs, assign the appropriate VLAN to the interface connected to the laptop by entering `SW3(config-if)#switchport mode access` and `SW3(config-if)#switchport access vlan [vlan-id]`.
+
+
+### 2. Configure the fa0/2 interfaces on Sw1 and Sw2 as 802.1q trunks with only the required VLANs permitted.
+
+### Switch 1
+```
+SW1>en
+SW1#conf t
+SW1(config)#int f0/2
+SW1(config-if)#switchport trunk encapsulation dot1q
+SW1(config-if)#switchport mode trunk
+SW1(config-if)#switchport trunk allowed vlan 210
+SW1(config-if)#exit
+```
+To configure a port as a trunk, enter the command `SW1(config-if)#switchport mode trunk`. If the switch rejects the command, enter `SW1(config-if)#switchport trunk encapsulation dot1q` and then re-enter the previous command. The switch rejects the command because it is currently set to 'auto' encapsulation. Since it supports more than one trunking method, meaning it is capable of using either the industry-standard 'dot1q' or the older Cisco-proprietary 'ISL'. You must manually lock it to 'dot1q' before it is allowed to become a trunk. Essentially, the switch is waiting for you to tell it which 'language' to speak before it activates the link. After that, allow VLAN 210 to pass through the trunk port by entering `SW1(config-if)#switchport allowed vlan 210`.
+
+### Switch 2
+```
+SW2>en
+SW2#conf t
+SW2(config)#int f0/2
+SW2(config-if)#switchport trunk encapsulation dot1q
+SW2(config-if)#switchport mode trunk
+SW2(config-if)#switchport trunk allowed vlan 210
+SW2(config-if)#exit
+```
+
+### 3. Configure the fa0/3 interfaces on Sw2 and Sw3 as 802.1q trunks with only the required VLANs permitted.
+
+### Switch 2
+```
+SW2>en
+SW2#conf t
+SW2(config)#int f0/3
+SW2(config-if)#switchport trunk encapsulation dot1q
+SW2(config-if)#switchport mode trunk
+SW2(config-if)#switchport trunk allowed vlan 110,210
+SW2(config-if)#exit
+```
+
+### Switch 3
+```
+SW3>en
+SW3#conf t
+SW3(config)#int f0/3
+SW3(config-if)#switchport trunk encapsulation dot1q
+SW3(config-if)#switchport mode trunk
+SW3(config-if)#switchport trunk allowed vlan 110,210
+SW3(config-if)#exit
+```
+
+<!-- lmao, just realized, linalagyan ko lahat masyado ng explanation yung mga steps na naexplain ko na sa previous steps and super reduntant masyado. gotta clean the mess latur... -->
+
+### Result
+![12.1](imgs/VTS_PDU_STATUS.png)
+
+I'm testing the laptops across the whole network. Laptops in the same VLAN should ping successfully, but packets should be dropped if the laptops are in different VLANs. In this lab, Laptop 1 should only be able to ping Laptop 4 vice versa, and Laptop 2 should only be able to ping Laptop 3 vice versa.
+</details>
